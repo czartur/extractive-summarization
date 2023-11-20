@@ -29,10 +29,10 @@ def tt_split(dialogs, labels, test_size=0.2, random_state=42):
         d_train_sentences, d_val_sentences, d_train_labels, d_val_labels = train_test_split(d_sentences, d_labels, test_size=test_size, random_state=random_state)
         
         # aggregate split
-        train_sentences.append(d_train_sentences)
-        val_sentences.append(d_val_sentences)
-        train_labels.append(d_train_labels)
-        val_labels.append(d_val_labels)
+        train_sentences += d_train_sentences
+        val_sentences += d_val_sentences
+        train_labels += d_train_labels
+        val_labels += d_val_labels
     
     return train_sentences, val_sentences, train_labels, val_labels
 
