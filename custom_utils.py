@@ -1,9 +1,11 @@
 import json
+import torch
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 
-def gather_dataset(folder_path : str) -> dict:
-    nodes = dict()
+def gather_dataset(folder_path : str, combine : bool = True) -> tuple[dict, dict, dict]:
+    speakers = dict()
+    dialogs = dict()
     edges = dict()
     for item in Path(folder_path).iterdir():
         if not item.is_file(): continue 
@@ -18,18 +20,25 @@ def gather_dataset(folder_path : str) -> dict:
         
         # nodes
         dialog = []
+        speaker = [] 
         for sentence in nodes_data:
-            dialog.append(sentence["speaker"] + ": " + sentence["text"])
-        nodes[dialog_id] = dialog 
+            speaker.append(sentence["speaker"])
+            if combine:
+                dialog.append(sentence["speaker"] + ": " + sentence["text"])
+            else:
+                dialog.append(sentence["text"]) 
+        dialogs[dialog_id] = dialog
+        speakers[dialog_id] = speaker
+
         
         # edges
         connections = [] 
         for connection in edges_data:
-            id_from, id_to = connection.split()[0], connection.split()[2]
-            connections.append([int(id_from), int(id_to)])
+            id_from, attribute, id_to = connection.split()
+            connections.append([int(id_from), attribute, int(id_to)])
         edges[dialog_id] = connections
         
-    return nodes, edges
+    return dialogs, speakers, edges
 
 def tt_split(dialogs, labels, test_size=0.2, random_state=42):
     train_sentences = []
@@ -50,6 +59,14 @@ def tt_split(dialogs, labels, test_size=0.2, random_state=42):
     
     return train_sentences, val_sentences, train_labels, val_labels
 
+def hotencode(X : list) -> list:
+    switcher = {
+        "PM" : [1,0,0,0],
+        "ME" : [0,1,0,0],
+        "UI" : [0,0,1,0],
+        "ID" : [0,0,0,1]
+    }
+    return [switcher[el] for el in X]
 
 # dataset = gather_dataset("training")
 # with open("test.json", "w") as json_file:
