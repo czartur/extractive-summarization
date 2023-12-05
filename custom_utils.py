@@ -1,9 +1,9 @@
 import json
 import torch
 from pathlib import Path
-from sklearn.model_selection import train_test_split
 from typing import Union, Optional
-
+device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu"
 """
 Concatenates all sentences and *labels in $folder_path to lists
 
@@ -81,36 +81,29 @@ def read_data_by_ID(folder_path : str, combine : bool = True) -> tuple[dict, dic
         
     return dialogs, speakers, edges
 
-def tt_split(dialogs, labels, test_size=0.2, random_state=42):
-    train_sentences = []
-    val_sentences = []
-    train_labels = [] 
-    val_labels = []
-    for dialog_id in dialogs:
-        # train test split inside the dialog
-        d_sentences = dialogs[dialog_id]
-        d_labels = labels[dialog_id]
-        d_train_sentences, d_val_sentences, d_train_labels, d_val_labels = train_test_split(d_sentences, d_labels, test_size=test_size, random_state=random_state)
-        
-        # aggregate split
-        train_sentences += d_train_sentences
-        val_sentences += d_val_sentences
-        train_labels += d_train_labels
-        val_labels += d_val_labels
-    
-    return train_sentences, val_sentences, train_labels, val_labels
-
-
-def hotencode(X : list) -> list:
+def format_input(sentences, speakers, tokenizer, max_seq_len):
+    # hot encoder
     switcher = {
         "PM" : [1,0,0,0],
         "ME" : [0,1,0,0],
         "UI" : [0,0,1,0],
         "ID" : [0,0,0,1]
     }
-    return [switcher[el] for el in X]
+    # params
+    params = {
+        'max_length' : max_seq_len,
+        'padding' : True,
+        'truncation' : True,
+        'return_token_type_ids' : False
+    }
+    # tokenization
+    tokens = tokenizer.batch_encode_plus(sentences, **params)
 
-# dataset = gather_dataset("training")
-# with open("test.json", "w") as json_file:
-    # json.dump(dataset, json_file, indent=2)
+    res = {
+        "seq" : torch.tensor(tokens['input_ids']),
+        "mask" : torch.tensor(tokens['attention_mask']),
+        "speakers" : torch.Tensor([switcher[el] for el in speakers]).to(device),
+        "lengths" : torch.Tensor([[len(sentence.split())] for sentence in sentences]).to(device),
+    }
 
+    return res
