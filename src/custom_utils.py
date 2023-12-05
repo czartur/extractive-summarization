@@ -2,8 +2,6 @@ import json
 import torch
 from pathlib import Path
 from typing import Union, Optional
-device = "cuda" if torch.cuda.is_available() else "cpu"
-device = "cpu"
 """
 Concatenates all sentences and *labels in $folder_path to lists
 
@@ -81,7 +79,7 @@ def read_data_by_ID(folder_path : str, combine : bool = True) -> tuple[dict, dic
         
     return dialogs, speakers, edges
 
-def format_input(sentences, speakers, tokenizer, max_seq_len):
+def format_input(sentences, speakers, tokenizer, max_seq_len, device):
     # hot encoder
     switcher = {
         "PM" : [1,0,0,0],
@@ -100,8 +98,8 @@ def format_input(sentences, speakers, tokenizer, max_seq_len):
     tokens = tokenizer.batch_encode_plus(sentences, **params)
 
     res = {
-        "seq" : torch.tensor(tokens['input_ids']),
-        "mask" : torch.tensor(tokens['attention_mask']),
+        "seq" : torch.tensor(tokens['input_ids']).to(device),
+        "mask" : torch.tensor(tokens['attention_mask']).to(device),
         "speakers" : torch.Tensor([switcher[el] for el in speakers]).to(device),
         "lengths" : torch.Tensor([[len(sentence.split())] for sentence in sentences]).to(device),
     }
