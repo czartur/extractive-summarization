@@ -1,7 +1,9 @@
 import json
 import torch
 from pathlib import Path
-from typing import Union, Optional
+from typing import Optional
+import pandas as pd
+
 """
 Concatenates all sentences and *labels in $folder_path to lists
 
@@ -105,3 +107,45 @@ def format_input(sentences, speakers, tokenizer, max_seq_len, device):
     }
 
     return res
+
+"""
+new version of read_data --> returning a dataframe
+current features: in_degrees, out_degrees, sentences, speakers, labels(optional)
+"""
+def read_data_to_dataframe(dialogs_folder : str, labels_file : Optional[str]) -> pd.DataFrame:
+    sentences, speakers, edges = read_data_by_ID(dialogs_folder, combine=False)
+    dialog_ids = sentences.keys()
+
+    if labels_file:
+        labels = json.load(open(labels_file, "r"))
+
+    # capture in and out degrees
+    in_degrees = {}
+    out_degrees = {}
+    for id in dialog_ids:
+        n_nodes = len(sentences[id])
+        in_degree = [0]*n_nodes
+        out_degree = [0]*n_nodes
+
+        for edge in edges[id]:
+            out_degree[edge[0]] += 1
+            in_degree[edge[2]] += 1
+
+        in_degrees[id] = in_degree
+        out_degrees[id] = out_degree
+
+    # pack dialog features into a dataframe
+    df_list = []
+    for id in dialog_ids:
+        new_df = pd.DataFrame(
+            {
+                "sentences" : sentences[id], 
+                "in_degree" : in_degrees[id],
+                "out_degree" : out_degrees[id],
+            }
+        )
+        if labels_file:
+            new_df["labels"] = labels[id]
+    df = pd.concat(df_list, ignore_index=True)
+
+    return df
