@@ -139,7 +139,8 @@ def read_data_to_dataframe(dialogs_folder : str, labels_file : Optional[str]) ->
     for id in dialog_ids:
         new_df = pd.DataFrame(
             {
-                "sentences" : sentences[id], 
+                "sentences" : sentences[id],
+                "speakers" : speakers[id],
                 "in_degrees" : in_degrees[id],
                 "out_degrees" : out_degrees[id],
             }
