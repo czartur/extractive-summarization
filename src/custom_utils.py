@@ -140,12 +140,13 @@ def read_data_to_dataframe(dialogs_folder : str, labels_file : Optional[str]) ->
         new_df = pd.DataFrame(
             {
                 "sentences" : sentences[id], 
-                "in_degree" : in_degrees[id],
-                "out_degree" : out_degrees[id],
+                "in_degrees" : in_degrees[id],
+                "out_degrees" : out_degrees[id],
             }
         )
         if labels_file:
             new_df["labels"] = labels[id]
-    df = pd.concat(df_list, ignore_index=True)
+        df_list.append(new_df)
 
+    df = pd.concat(df_list, ignore_index=True)
     return df
