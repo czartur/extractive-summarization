@@ -10,7 +10,6 @@ This repository contains the code and resources for a deep learning project focu
 - [Model Architecture](#model-architecture)🧠
 - [Training](#training)🏋️‍♂️
 - [Evaluation](#evaluation)📊
-- [Results](#results)📈
 
 ## Installation 📥
 1. Ensure you have Python 3.x (with pip) before running the project
