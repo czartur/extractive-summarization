@@ -43,8 +43,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Majority vote over prediction labels")
     
     parser.add_argument("--prediction_folder", type=str, default="prediction", help="Path to the prediction folder")
-    parser.add_argument("--labels_path", type=str, default="test_labels.json", help="Path to labels")
+    parser.add_argument("--test_labels", type=str, default="test_labels.json", help="Path to labels")
 
     args = parser.parse_args()
 
-    main(args.prediction_folder, args.labels_path)
+    main(args.prediction_folder, args.test_labels)
