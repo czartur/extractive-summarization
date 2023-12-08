@@ -67,9 +67,9 @@ if __name__ == "__main__":
     parser.add_argument("--training_folder", type=str, default="training", help="Path to the training folder")
     parser.add_argument("--training_labels", type=str, default="training_labels.json", help="Path to training labelss files")
     parser.add_argument("--model", type=str, default="trained_model.pt", help="Path to save the model")
-    parser.add_argument("--training_parameters", type=str, default="default_training_parameters.json", help="Path to the training parameters")
-    parser.add_argument("--model_parameters", type=str, default="default_model_parameters.json", help="Path to the model parameters")
-
+    parser.add_argument("--training_parameters", type=str, default="tuner/parameters/default_training_parameters.json", help="Path to the training parameters")
+    parser.add_argument("--model_parameters", type=str, default="tuner/parameters/default_model_parameters.json", help="Path to the model parameters")
+    
     args = parser.parse_args()
 
     train, valid = read_dataset(args.training_folder, args.training_labels)

@@ -1,0 +1,1 @@
+{"batch_size": 128, "lr": 0.0005595147939796057, "weight_decay": 5.913216878057305e-05, "n_epochs": 7, "eval_at": 50, "max_patience": 10}

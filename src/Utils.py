@@ -48,6 +48,7 @@ def read_data_by_ID(folder_path : str, combine : bool = True) -> tuple[dict, dic
     speakers = dict()
     dialogs = dict()
     edges = dict()
+    
     for item in Path(folder_path).iterdir():
         if not item.is_file(): continue 
         if not item.suffix == ".json": continue
@@ -81,7 +82,7 @@ def read_data_by_ID(folder_path : str, combine : bool = True) -> tuple[dict, dic
         
     return dialogs, speakers, edges
 
-def format_input(sentences, speakers, tokenizer, max_seq_len, device):
+def format_input(sentences, speakers, in_degrees, out_degrees, tokenizer, max_seq_len, device):
     # hot encoder
     switcher = {
         "PM" : [1,0,0,0],
@@ -100,10 +101,12 @@ def format_input(sentences, speakers, tokenizer, max_seq_len, device):
     tokens = tokenizer.batch_encode_plus(sentences, **params)
 
     res = {
-        "seq" : torch.tensor(tokens['input_ids']).to(device),
-        "mask" : torch.tensor(tokens['attention_mask']).to(device),
-        "speakers" : torch.Tensor([switcher[el] for el in speakers]).to(device),
-        "lengths" : torch.Tensor([[len(sentence.split())] for sentence in sentences]).to(device),
+        "sequence" : torch.tensor(tokens['input_ids']).to(device),
+        "attention_mask" : torch.tensor(tokens['attention_mask']).to(device),
+        "in_degree" : torch.Tensor([[deg] for deg in in_degrees]).to(device),
+        "out_degree" : torch.Tensor([[deg/6] for deg in out_degrees]).to(device),
+        "speaker" : torch.Tensor([switcher[el] for el in speakers]).to(device),
+        "length" : torch.Tensor([[len(sentence.split())] for sentence in sentences]).to(device),
     }
 
     return res
